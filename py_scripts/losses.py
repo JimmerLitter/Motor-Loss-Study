@@ -15,12 +15,19 @@ def phase_current(T_nm, Kt_nm_per_a):
     return T_nm / Kt_nm_per_a
 
 
+"""R_hot / R_ph_ohm at temp_c: 1 + alpha_cu * (temp_c - R_ref_temp_c).
+Separated out so callers (report tables) can show the multiplier actually
+applied, not just its downstream effect on P_cu."""
+def resistance_ratio(temp_c, m):
+    return 1.0 + ALPHA_CU_PER_C * (temp_c - m.R_ref_temp_c)
+
+
 """3-phase copper (Joule) loss, with copper resistance temperature rise.
 P_cu = 3 * I_ph^2 * R_ph(temp_c)
-R_ph(temp_c) = R_ph_ohm * (1 + alpha_cu * (temp_c - R_ref_temp_c))"""
+R_ph(temp_c) = R_ph_ohm * resistance_ratio(temp_c, m)"""
 def copper_loss(T_nm, m, temp_c):
     I_ph_a = phase_current(T_nm, m.Kt_nm_per_a)
-    R_hot_ohm = m.R_ph_ohm * (1.0 + ALPHA_CU_PER_C * (temp_c - m.R_ref_temp_c))
+    R_hot_ohm = m.R_ph_ohm * resistance_ratio(temp_c, m)
     return 3.0 * I_ph_a ** 2 * R_hot_ohm
 
 

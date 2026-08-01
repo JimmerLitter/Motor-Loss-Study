@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 
 from config import MOTOR, ALPHA_CU_PER_C
 from plot_losses import SURFACE, INK, INK_2, MUTED, C_COPPER, style
-from losses import elec_freq, copper_loss
+from losses import elec_freq, copper_loss, representative_rpm
 
 RHO_20_OHM_M = 1.724e-8    # copper resistivity @ 20 C
 MU0 = 4e-7 * np.pi
@@ -106,20 +106,23 @@ def print_skin_depth_table(m):
     print("=" * 66)
     print("SKIN DEPTH vs SPEED  (winding at 100 C)")
     print("=" * 66)
+    max_rpm = m.Kv_rpm_per_v * m.bus_voltage_v
     print(f"{'rpm':>8} {'f_elec[Hz]':>12} {'delta[mm]':>12}")
-    for rpm in (1000, 3240, 5000, 6480):
+    for rpm in (1000, representative_rpm(m), 5000, max_rpm):
         f_hz = elec_freq(rpm, m.pole_pairs)
         print(f"{rpm:8.0f} {f_hz:12.1f} {skin_depth(f_hz, 100.0)*1e3:12.2f}")
 
 
 def print_dowell_table(m):
+    max_rpm = m.Kv_rpm_per_v * m.bus_voltage_v
+    f_max_hz = elec_freq(max_rpm, m.pole_pairs)
     print("\n" + "=" * 66)
-    print("DOWELL R_ac/R_dc @ 756 Hz (max speed), 100 C")
+    print(f"DOWELL R_ac/R_dc @ {f_max_hz:.0f} Hz (max speed), 100 C")
     print("=" * 66)
     print(f"{'AWG':>5} {'d[mm]':>8} " + "".join(f"{n:>8}L" for n in (2, 4, 6, 8, 10)))
     for g, d_mm in ((18, m.wire_diameter_mm), (20, 0.812), (22, 0.644),
                     (24, 0.511), (26, 0.405)):
-        row = "".join(f"{dowell_ratio(d_mm, 756, n):9.3f}" for n in (2, 4, 6, 8, 10))
+        row = "".join(f"{dowell_ratio(d_mm, f_max_hz, n):9.3f}" for n in (2, 4, 6, 8, 10))
         note = "  <- this design (R_ph-reconciled)" if g == 18 else ""
         print(f"{g:5d} {d_mm:8.3f} " + row + note)
 
@@ -190,7 +193,9 @@ and vs. wire thickness (several layer counts, this design's worst-case
 frequency) -- to show R_ac/R_dc stays ~1.0x inside this design's envelope
 and only moves once frequency or wire gauge moves outside it."""
 def save_ac_copper_sweep_figure(m):
-    F_OP_LO_HZ, F_OP_HI_HZ = 378.0, 756.0    # this design's electrical frequency range
+    # this design's electrical frequency range: representative (half no-load) speed to max speed
+    F_OP_LO_HZ = elec_freq(representative_rpm(m), m.pole_pairs)
+    F_OP_HI_HZ = elec_freq(m.Kv_rpm_per_v * m.bus_voltage_v, m.pole_pairs)
 
     fig, (axL, axR) = plt.subplots(1, 2, figsize=(11.6, 4.6))
     fig.patch.set_facecolor(SURFACE)
