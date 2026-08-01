@@ -334,7 +334,7 @@ ax.grid(False)
 ax.set_xlabel('Speed [rpm]', color=INK_2, fontsize=10)
 ax.set_ylabel('Torque [N·m]', color=INK_2, fontsize=10)
 ax.set_title('Efficiency = P_out / P_in',
-             color=INK, fontsize=11, pad=10, loc='left')
+             color=INK, fontsize=11, pad=10, loc='center')
 cb11 = fig11.colorbar(cs11, ax=ax, pad=0.02)
 cb11.set_label('Efficiency [%]', color=INK_2, fontsize=10)
 cb11.ax.tick_params(colors=MUTED, labelsize=9, length=0)
