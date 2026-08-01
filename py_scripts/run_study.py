@@ -72,7 +72,7 @@ def compute_over_grid(point_fn):
 
 Shared boilerplate for the plain loss/power maps -- the efficiency maps
 (with their extra thermal-limit overlay) are built by hand below."""
-def save_torque_speed_map(Z, filename, title, cbar_label, levels=22, title_loc='left'):
+def save_torque_speed_map(Z, filename, title, cbar_label, levels=22, title_loc='center'):
     fig, ax = plt.subplots(figsize=(7.6, 5.4))
     fig.patch.set_facecolor(SURFACE)
     cs = ax.contourf(RR, TT, Z, levels=levels, cmap=CMAP, zorder=1)
@@ -216,8 +216,7 @@ print('figures/thermal_limit.png')
 # =====================================================================
 P_FE = iron_loss(RR, MOTOR)
 save_torque_speed_map(P_FE, 'figures/core_loss.png',
-                      'Core loss tracks speed only -- flat vs. torque until '
-                      'copper loss enters (see Figure 2)',
+                      'Core loss ',
                       'Core loss [W]')
 
 
@@ -231,8 +230,7 @@ save_torque_speed_map(P_FE, 'figures/core_loss.png',
 # =====================================================================
 P_CU_AC = compute_over_grid(lambda T_nm, rpm, T_w_c: ac_copper_loss(T_nm, rpm, MOTOR, T_w_c))
 save_torque_speed_map(P_CU_AC, 'figures/ac_copper_loss.png',
-                      f'Copper loss, AC-corrected (AWG 18, '
-                      f'{MOTOR.winding_layers}-layer confirmed)',
+                      f'Copper loss',
                       'Copper loss, AC-corrected [W]', title_loc='center')
 
 
@@ -249,8 +247,7 @@ P_MECH_MW = mech_loss(RR, MOTOR) * 1000.0
 floor_mw = MOTOR.friction_floor_w * 1000.0
 windage_tail_mw = P_MECH_MW.max() - floor_mw
 save_torque_speed_map(P_MECH_MW, 'figures/mech_loss.png',
-                      f'Mechanical loss: a {floor_mw:.0f} mW friction floor -- '
-                      f'windage adds only {windage_tail_mw:.1f} mW at top speed',
+                      f'Mechanical loss',
                       'Mechanical loss [mW]')
 
 
@@ -265,8 +262,7 @@ save_torque_speed_map(P_MECH_MW, 'figures/mech_loss.png',
 # =====================================================================
 P_CU_DC = copper_loss(TT, MOTOR, MOTOR.R_ref_temp_c)
 save_torque_speed_map(P_CU_DC, 'figures/dc_copper_loss.png',
-                      f'DC copper loss (I²R at {MOTOR.R_ref_temp_c:.0f} °C) '
-                      '-- torque-only, flat with speed',
+                      f'DC copper loss',
                       'Copper loss, DC [W]')
 
 
@@ -279,7 +275,7 @@ save_torque_speed_map(P_CU_DC, 'figures/dc_copper_loss.png',
 # =====================================================================
 P_OUT = output_power(TT, RR)
 save_torque_speed_map(P_OUT, 'figures/output_power.png',
-                      'Output power (T x omega) -- scales with both torque and speed',
+                      'Output power',
                       'Output power [W]')
 
 
@@ -297,8 +293,7 @@ save_torque_speed_map(P_OUT, 'figures/output_power.png',
 # =====================================================================
 P_LOSS_TOTAL = P_CU_AC + P_FE + P_MECH_MW / 1000.0
 save_torque_speed_map(P_LOSS_TOTAL, 'figures/total_loss.png',
-                      'Total loss: copper-dominated at high torque, iron-dominated '
-                      'at high speed (AC-corrected)',
+                      'Total loss',
                       'Total loss [W]')
 
 
@@ -311,7 +306,7 @@ save_torque_speed_map(P_LOSS_TOTAL, 'figures/total_loss.png',
 # =====================================================================
 P_IN = P_OUT + P_LOSS_TOTAL
 save_torque_speed_map(P_IN, 'figures/input_power.png',
-                      'Total input power: P_in = P_out + P_loss (AC-corrected)',
+                      'P_in = P_out + P_loss',
                       'Input power [W]')
 
 
@@ -338,7 +333,7 @@ style(ax)
 ax.grid(False)
 ax.set_xlabel('Speed [rpm]', color=INK_2, fontsize=10)
 ax.set_ylabel('Torque [N·m]', color=INK_2, fontsize=10)
-ax.set_title('Efficiency = P_out / P_in, AC-corrected (consistent with Figures 9-10)',
+ax.set_title('Efficiency = P_out / P_in',
              color=INK, fontsize=11, pad=10, loc='left')
 cb11 = fig11.colorbar(cs11, ax=ax, pad=0.02)
 cb11.set_label('Efficiency [%]', color=INK_2, fontsize=10)
@@ -366,8 +361,7 @@ print('figures/efficiency_map_clean.png')
 F_ELEC = elec_freq(RR, MOTOR.pole_pairs)
 RATIO = np.vectorize(dowell_ratio)(MOTOR.wire_diameter_mm, F_ELEC, MOTOR.winding_layers, 100.0)
 save_torque_speed_map(RATIO, 'figures/ac_ratio.png',
-                      'AC resistance penalty (R_ac/R_dc) rises with speed alone -- '
-                      'independent of torque',
+                      'AC resistance penalty (R_ac/R_dc) rises with speed alone ',
                       'R_ac / R_dc')
 
 
