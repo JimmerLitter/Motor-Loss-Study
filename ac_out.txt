@@ -1,0 +1,71 @@
+==================================================================
+SKIN DEPTH vs SPEED  (winding at 100 C)
+==================================================================
+     rpm   f_elec[Hz]    delta[mm]
+    1000        116.7         7.01
+    3240        378.0         3.90
+    5000        583.3         3.14
+    6480        756.0         2.76
+
+==================================================================
+DOWELL R_ac/R_dc @ 756 Hz (max speed), 100 C
+==================================================================
+  AWG    d[mm]        2L       4L       6L       8L      10L
+   18    1.024     1.005    1.021    1.047    1.083    1.130  <- this design (R_ph-reconciled)
+   20    0.812     1.002    1.008    1.019    1.033    1.052
+   22    0.644     1.001    1.003    1.007    1.013    1.020
+   24    0.511     1.000    1.001    1.003    1.005    1.008
+   26    0.405     1.000    1.001    1.001    1.002    1.003
+
+==================================================================
+WINDING RECONCILIATION  (R_ph + FEMM slot area -> fill factor)
+==================================================================
+A_slot = 29.44 mm^2   R_ph = 0.039 ohm   12N14P assumed
+
+n/coil = 8 is CONFIRMED for this winding. Solving conductor size
+from measured R_ph at that turn count (not the unreconciled '12 AWG'
+figure found online -- see note in config.py) gives the design gauge:
+
+ n/coil   N_ph   L_mean   A_cond[mm2]   AWG     k_f  verdict
+      4     16      60mm         0.424    21   0.115  TOO LOW
+      4     16      80mm         0.566    20   0.154  TOO LOW
+      5     20      60mm         0.530    20   0.180  TOO LOW
+      5     20      80mm         0.707    19   0.240  TOO LOW
+      6     24      60mm         0.637    19   0.259  plausible
+      6     24      80mm         0.849    18   0.346  plausible
+      7     28      60mm         0.743    18   0.353  plausible
+      7     28      80mm         0.990    17   0.471  plausible
+      8     32      60mm         0.849    18   0.461  plausible  <- confirmed n/coil
+      8     32      80mm         1.132    17   0.615  plausible  <- confirmed n/coil
+      9     36      60mm         0.955    17   0.584  plausible
+      9     36      80mm         1.273    16   0.778  TOO HIGH
+     10     40      60mm         1.061    17   0.721  TOO HIGH
+     10     40      80mm         1.415    16   0.961  TOO HIGH
+
+==================================================================
+TURN-COUNT INDEPENDENCE of DC copper loss at fixed torque
+==================================================================
+(k_f=0.4, A_slot=29.4 mm^2, T=0.3 Nm, Kt scaled with N)
+ n/coil   A_cond[mm2]   R_ph[ohm]       Kt     I[A]   P_cu[W]
+      4         1.472      0.0150   0.0194    15.44     10.72
+      6         0.981      0.0337   0.0291    10.29     10.72
+      7         0.841      0.0459   0.0340     8.82     10.72
+     10         0.589      0.0937   0.0486     6.18     10.72
+     14         0.421      0.1837   0.0680     4.41     10.72
+  -> P_cu constant: R ~ N^2 but I ~ 1/N, so I^2*R cancels.
+     Turn count sets Kv, NOT efficiency.
+
+==================================================================
+FILL FACTOR is the real lever (fixed torque, n=7)
+==================================================================
+  k_f=0.30 -> R_ph=0.0612 ohm, P_cu= 14.30 W  (  +0.0%)
+  k_f=0.35 -> R_ph=0.0525 ohm, P_cu= 12.26 W  ( -14.3%)
+  k_f=0.40 -> R_ph=0.0459 ohm, P_cu= 10.72 W  ( -25.0%)
+  k_f=0.45 -> R_ph=0.0408 ohm, P_cu=  9.53 W  ( -33.3%)
+  k_f=0.50 -> R_ph=0.0367 ohm, P_cu=  8.58 W  ( -40.0%)
+  k_f=0.60 -> R_ph=0.0306 ohm, P_cu=  7.15 W  ( -50.0%)
+
+==================================================================
+SAVING AC COPPER SWEEP FIGURE (conclusive: where does R_ac/R_dc move?)
+==================================================================
+figures/ac_copper_sweep.png

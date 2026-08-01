@@ -1,0 +1,5 @@
+__pycache__/
+*.pyc
+
+# Claude-generated vault notes 
+(C)*.md
